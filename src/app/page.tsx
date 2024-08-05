@@ -51,7 +51,7 @@ export default function RandomUserPage() {
           <input
             className="form-control text-center"
             style={{ maxWidth: "100px" }}
-            type="number"
+            type="Number"
             onChange={(e) => setGenAmount(Number(e.target.value))}
             value={genAmount}
           />
