@@ -1,3 +1,12 @@
-// add type for UserCard's Props
+interface UserCardProps {
+  id: number;
+  name: string;
+  imgUrl: string;
+  address: string;
+  email: string;
+}
 
-// add type for UserCardDetail's Props
+interface UserCardDetailProps {
+  email: string;
+  address: string;
+}
