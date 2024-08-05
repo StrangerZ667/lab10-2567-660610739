@@ -1,14 +1,17 @@
 "use client";
 
+import UserCard from "@/components/UserCard";
+import { cleanUser } from "@/libs/cleanUser";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function RandomUserPage() {
   // annotate type for users state variable
-  const [users, setUsers] = useState(null);
 
+  const [users, setUsers] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [genAmount, setGenAmount] = useState(1);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const generateBtnOnClick = async () => {
     setIsLoading(true);
@@ -17,32 +20,57 @@ export default function RandomUserPage() {
     );
     setIsLoading(false);
     const users = resp.data.results;
+    const CleanUser = users.map((x:number) => cleanUser(x));
+    setUsers(CleanUser);
+    };
 
-    //Your code here
-    //Process result from api response with map function. Tips use function from /src/libs/cleanUser
-    //Then update state with function : setUsers(...)
-  };
-
-  return (
-    <div style={{ maxWidth: "700px" }} className="mx-auto">
-      <p className="display-4 text-center fst-italic m-4">Users Generator</p>
-      <div className="d-flex justify-content-center align-items-center fs-5 gap-2">
-        Number of User(s)
-        <input
-          className="form-control text-center"
-          style={{ maxWidth: "100px" }}
-          type="number"
-          onChange={(e) => setGenAmount(e.target.value)}
-          value={genAmount}
-        />
-        <button className="btn btn-dark" onClick={generateBtnOnClick}>
-          Generate
-        </button>
+    useEffect(() => {
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+        return;
+      }
+      const strAmount = JSON.stringify(genAmount);
+      localStorage.setItem("genAmount", strAmount);
+    }, [genAmount]);
+  
+    useEffect(() => {
+      const getStrAmount = localStorage.getItem("genAmount");
+      if (getStrAmount === null) {
+        setGenAmount(1);
+        return;
+      }
+      const loadedAmount = JSON.parse(getStrAmount);
+      setGenAmount(loadedAmount);
+    }, []);
+  
+    return (
+      <div style={{ maxWidth: "700px" }} className="mx-auto">
+        <p className="display-4 text-center fst-italic m-4">Users Generator</p>
+        <div className="d-flex justify-content-center align-items-center fs-5 gap-2">
+          Number of User(s)
+          <input
+            className="form-control text-center"
+            style={{ maxWidth: "100px" }}
+            type="number"
+            onChange={(e) => setGenAmount(Number(e.target.value))}
+            value={genAmount}
+          />
+          <button className="btn btn-dark" onClick={generateBtnOnClick}>
+            Generate
+          </button>
+        </div>
+        {isLoading && (
+          <p className="display-6 text-center fst-italic my-4">Loading ...</p>
+        )}
+        {users && !isLoading && users.map((user:any) => (
+          <UserCard
+            key={user.id}
+            name={user.name}
+            imgUrl={user.imgUrl}
+            address={user.address}
+            email={user.email}
+          />
+        ))}
       </div>
-      {isLoading && (
-        <p className="display-6 text-center fst-italic my-4">Loading ...</p>
-      )}
-      {users && !isLoading && users.map(/*code map rendering UserCard here */)}
-    </div>
-  );
-}
+    );
+  }
